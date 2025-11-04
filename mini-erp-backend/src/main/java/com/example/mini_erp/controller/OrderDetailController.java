@@ -1,82 +1,105 @@
 package com.example.mini_erp.controller;
 
+import com.example.mini_erp.dto.ErrorResponse;
+import com.example.mini_erp.dto.OrderDetailDTO;
 import com.example.mini_erp.entity.OrderDetail;
 import com.example.mini_erp.service.OrderDetailService;
+import com.example.mini_erp.util.DtoConverter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/order-details")
 public class OrderDetailController {
 
     private final OrderDetailService orderDetailService;
+    private final DtoConverter dtoConverter;
 
-    public OrderDetailController(OrderDetailService orderDetailService) {
+    public OrderDetailController(OrderDetailService orderDetailService, DtoConverter dtoConverter) {
         this.orderDetailService = orderDetailService;
+        this.dtoConverter = dtoConverter;
     }
 
     // 查詢所有訂單詳情
     @GetMapping
-    public ResponseEntity<List<OrderDetail>> getAllOrderDetails() {
+    public ResponseEntity<List<OrderDetailDTO>> getAllOrderDetails() {
         List<OrderDetail> orderDetails = orderDetailService.getAllOrderDetails();
         if (orderDetails.isEmpty()) {
-            return ResponseEntity.noContent().build();  // 返回 204 No Content，如果沒有訂單詳情
+            return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(orderDetails);
+        List<OrderDetailDTO> orderDetailDTOs = orderDetails.stream()
+                .map(dtoConverter::toOrderDetailDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(orderDetailDTOs);
     }
 
     // 根據ID查詢訂單詳情
     @GetMapping("/{orderDetailId}")
-    public ResponseEntity<OrderDetail> getOrderDetailById(@PathVariable int orderDetailId) {
+    public ResponseEntity<?> getOrderDetailById(@PathVariable int orderDetailId) {
         Optional<OrderDetail> orderDetail = orderDetailService.getOrderDetailById(orderDetailId);
-        return orderDetail.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());  // 返回 404 如果找不到訂單詳情
+        if (orderDetail.isPresent()) {
+            OrderDetailDTO orderDetailDTO = dtoConverter.toOrderDetailDTO(orderDetail.get());
+            return ResponseEntity.ok(orderDetailDTO);
+        } else {
+            ErrorResponse error = new ErrorResponse(404, "Not Found", "找不到訂單詳情 ID: " + orderDetailId);
+            return ResponseEntity.status(404).body(error);
+        }
     }
 
     // 根據訂單ID查詢訂單詳情
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<List<OrderDetail>> getOrderDetailsByOrderId(@PathVariable int orderId) {
+    public ResponseEntity<List<OrderDetailDTO>> getOrderDetailsByOrderId(@PathVariable int orderId) {
         List<OrderDetail> orderDetails = orderDetailService.getOrderDetailsByOrderId(orderId);
         if (orderDetails.isEmpty()) {
-            return ResponseEntity.noContent().build();  // 返回 204 No Content 如果沒有該訂單的詳情
+            return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(orderDetails);
+        List<OrderDetailDTO> orderDetailDTOs = orderDetails.stream()
+                .map(dtoConverter::toOrderDetailDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(orderDetailDTOs);
     }
 
     // 新增訂單詳情
     @PostMapping
-    public ResponseEntity<OrderDetail> addOrderDetail(@RequestBody OrderDetail orderDetail) {
+    public ResponseEntity<?> addOrderDetail(@RequestBody OrderDetail orderDetail) {
         try {
             OrderDetail createdOrderDetail = orderDetailService.addOrderDetail(orderDetail);
-            return ResponseEntity.status(201).body(createdOrderDetail);  // 返回 201 Created
+            OrderDetailDTO orderDetailDTO = dtoConverter.toOrderDetailDTO(createdOrderDetail);
+            return ResponseEntity.status(201).body(orderDetailDTO);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);  // 返回 400 如果發生錯誤
+            ErrorResponse error = new ErrorResponse(400, "Bad Request", "新增訂單詳情失敗: " + e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
 
     // 更新訂單詳情
     @PutMapping("/{orderDetailId}")
-    public ResponseEntity<OrderDetail> updateOrderDetail(
+    public ResponseEntity<?> updateOrderDetail(
             @PathVariable int orderDetailId, 
             @RequestBody OrderDetail orderDetail) {
         try {
             OrderDetail updatedOrderDetail = orderDetailService.updateOrderDetail(orderDetailId, orderDetail);
-            return ResponseEntity.ok(updatedOrderDetail);  // 返回 200 OK
+            OrderDetailDTO orderDetailDTO = dtoConverter.toOrderDetailDTO(updatedOrderDetail);
+            return ResponseEntity.ok(orderDetailDTO);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();  // 返回 404 如果訂單詳情不存在
+            ErrorResponse error = new ErrorResponse(404, "Not Found", "更新訂單詳情失敗: " + e.getMessage());
+            return ResponseEntity.status(404).body(error);
         }
     }
 
     // 刪除訂單詳情
     @DeleteMapping("/{orderDetailId}")
-    public ResponseEntity<Void> deleteOrderDetail(@PathVariable int orderDetailId) {
+    public ResponseEntity<?> deleteOrderDetail(@PathVariable int orderDetailId) {
         try {
             orderDetailService.deleteOrderDetail(orderDetailId);
-            return ResponseEntity.noContent().build();  // 返回 204 No Content 成功刪除
+            return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();  // 返回 404 如果訂單詳情不存在
+            ErrorResponse error = new ErrorResponse(404, "Not Found", "刪除訂單詳情失敗: " + e.getMessage());
+            return ResponseEntity.status(404).body(error);
         }
     }
 }

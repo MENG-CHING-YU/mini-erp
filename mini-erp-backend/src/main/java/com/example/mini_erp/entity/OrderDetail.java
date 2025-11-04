@@ -17,25 +17,25 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "OrderDetails")
+@Table(name = "order_details")
 public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OrderDetailID")
+    @Column(name = "order_detail_id")
     private Integer orderDetailId;
 
     @ManyToOne
-    @JoinColumn(name = "OrderID", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "ProductID", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "Quantity", nullable = false)
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "UnitPrice", nullable = false)
+    @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
     // 計算小計金額（這部分不會存儲在資料庫）

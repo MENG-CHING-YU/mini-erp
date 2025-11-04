@@ -2,6 +2,7 @@ package com.example.mini_erp.service;
 
 import com.example.mini_erp.entity.Order;
 import com.example.mini_erp.entity.OrderDetail;
+import com.example.mini_erp.exception.ResourceNotFoundException;
 import com.example.mini_erp.repository.OrderRepository;
 
 import org.springframework.stereotype.Service;
@@ -34,8 +35,19 @@ public class OrderService {
     // 新增訂單
     @Transactional
     public Order createOrder(Order order) {
+        // 驗證訂單基本資訊
+        if (order.getCustomerName() == null || order.getCustomerName().trim().isEmpty()) {
+            throw new IllegalArgumentException("客戶姓名不能為空");
+        }
+        if (order.getOrderDetails() == null || order.getOrderDetails().isEmpty()) {
+            throw new IllegalArgumentException("訂單明細不能為空");
+        }
+        
         // 在創建訂單之前檢查庫存並更新庫存
         for (OrderDetail detail : order.getOrderDetails()) {
+            if (detail.getQuantity() <= 0) {
+                throw new IllegalArgumentException("訂單數量必須大於 0");
+            }
             inventoryService.decreaseStock(detail.getProduct().getProductId(), detail.getQuantity());
         }
         return orderRepository.save(order);
@@ -45,7 +57,12 @@ public class OrderService {
     @Transactional
     public Order updateOrderStatus(int orderId, String status) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new RuntimeException("Order not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("訂單不存在，ID: " + orderId));
+        
+        if (status == null || status.trim().isEmpty()) {
+            throw new IllegalArgumentException("訂單狀態不能為空");
+        }
+        
         order.setStatus(status);
         return orderRepository.save(order);
     }
@@ -54,7 +71,7 @@ public class OrderService {
     @Transactional
     public void deleteOrder(int orderId) {
         if (!orderRepository.existsById(orderId)) {
-            throw new RuntimeException("Order not found");
+            throw new ResourceNotFoundException("訂單不存在，ID: " + orderId);
         }
         orderRepository.deleteById(orderId);
     }

@@ -17,31 +17,31 @@ import jakarta.persistence.TemporalType;
 import java.util.Date;
 @Data
 @Entity
-@Table(name = "InventoryTransactions")
+@Table(name = "inventory_transactions")
 public class InventoryTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "TransactionID")
+    @Column(name = "transaction_id")
     private Integer transactionId;
 
     @ManyToOne
-    @JoinColumn(name = "ProductID", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "Quantity", nullable = false)
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "TransactionType", nullable = false)
+    @Column(name = "transaction_type", nullable = false)
     private String transactionType;
 
     @ManyToOne
-    @JoinColumn(name = "OrderID")
+    @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(name = "TransactionDate")
+    @Column(name = "transaction_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date transactionDate = new Date();
 
-    @Column(name = "Notes")
+    @Column(name = "notes")
     private String notes;
 }

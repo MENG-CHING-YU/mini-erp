@@ -7,6 +7,10 @@ import MachinesView from '@/views/MachinesView.vue'
 import RepairsView from '@/views/RepairsView.vue'
 import EmployeesView from '@/views/EmployeesView.vue'
 import UserView from '@/views/UserViews.vue'
+import InventoryView from '@/views/InventoryView.vue'
+import OrdersView from '@/views/OrdersView.vue'
+import ProductsView from '@/views/ProductsView.vue'
+import TransactionsView from '@/views/TransactionsView.vue'
 
 const routes = [
   {
@@ -43,6 +47,26 @@ const routes = [
         path: 'users',
         component: UserView,
         meta: { title: '用戶管理', requiresAuth: true },
+      },
+      {
+        path: 'inventory',
+        component: InventoryView,
+        meta: { title: '庫存管理', requiresAuth: true },
+      },
+      {
+        path: 'orders',
+        component: OrdersView,
+        meta: { title: '訂單管理', requiresAuth: true },
+      },
+      {
+        path: 'products',
+        component: ProductsView,
+        meta: { title: '產品管理', requiresAuth: true },
+      },
+      {
+        path: 'transactions',
+        component: TransactionsView,
+        meta: { title: '庫存異動', requiresAuth: true },
       },
     ],
   },

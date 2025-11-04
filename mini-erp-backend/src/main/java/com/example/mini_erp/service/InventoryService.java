@@ -1,6 +1,9 @@
 package com.example.mini_erp.service;
 
 import com.example.mini_erp.entity.Inventory;
+import com.example.mini_erp.exception.BusinessException;
+import com.example.mini_erp.exception.InsufficientStockException;
+import com.example.mini_erp.exception.ResourceNotFoundException;
 import com.example.mini_erp.repository.InventoryRepository;
 import com.example.mini_erp.repository.ProductRepository;
 
@@ -52,7 +55,10 @@ public class InventoryService {
         // 更新庫存數量
         int newQuantity = inventory.getStockQuantity() + quantity;
         if (newQuantity < 0) {
-            throw new RuntimeException("庫存不足");
+            throw new InsufficientStockException(
+                String.format("產品 ID %d 庫存不足，當前庫存: %d，需要: %d", 
+                    productId, inventory.getStockQuantity(), Math.abs(quantity))
+            );
         }
 
         inventory.setStockQuantity(newQuantity);
@@ -67,12 +73,18 @@ public class InventoryService {
     // 增加庫存
     @Transactional
     public Inventory increaseStock(int productId, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("增加數量必須大於 0");
+        }
         return updateStock(productId, quantity, "IN");
     }
 
     // 減少庫存
     @Transactional
     public Inventory decreaseStock(int productId, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("減少數量必須大於 0");
+        }
         return updateStock(productId, -quantity, "OUT");
     }
 
@@ -81,11 +93,15 @@ public class InventoryService {
     public Inventory initializeInventory(int productId, int initialQuantity) {
         // 檢查產品是否存在
         productRepository.findById(productId)
-            .orElseThrow(() -> new RuntimeException("Product not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("產品不存在，ID: " + productId));
 
         // 檢查庫存是否已存在
         if (inventoryRepository.existsById(productId)) {
-            throw new RuntimeException("Inventory already exists for this product");
+            throw new BusinessException("產品 ID " + productId + " 的庫存已經初始化過了");
+        }
+
+        if (initialQuantity < 0) {
+            throw new IllegalArgumentException("初始庫存數量不能為負數");
         }
 
         Inventory inventory = new Inventory();

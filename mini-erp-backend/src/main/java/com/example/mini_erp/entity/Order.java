@@ -20,36 +20,36 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "Orders")
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OrderID")
+    @Column(name = "order_id")
     private Integer orderId;
 
-    @Column(name = "OrderDate", nullable = false)
+    @Column(name = "order_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date orderDate = new Date();
 
-    @Column(name = "CustomerName", nullable = false)
+    @Column(name = "customer_name", nullable = false)
     private String customerName;
 
-    @Column(name = "CustomerEmail")
+    @Column(name = "customer_email")
     private String customerEmail;
 
-    @Column(name = "TotalAmount", nullable = false)
+    @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;
 
-    @Column(name = "Status", nullable = false)
+    @Column(name = "status", nullable = false)
     private String status = "Pending";
 
-    @Column(name = "ShippingAddress")
+    @Column(name = "shipping_address")
     private String shippingAddress;
 
-    @Column(name = "PaymentStatus", nullable = false)
+    @Column(name = "payment_status", nullable = false)
     private String paymentStatus = "Pending";
 
-    @Column(name = "CreatedAt")
+    @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
     

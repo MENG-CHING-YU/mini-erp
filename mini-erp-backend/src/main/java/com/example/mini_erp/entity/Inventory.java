@@ -19,17 +19,17 @@ import java.util.Date;
 @Table(name = "Inventory")
 public class Inventory {
     @Id
-    @Column(name = "ProductID")
+    @Column(name = "product_id")
     private Integer productId;
 
     @OneToOne
-    @JoinColumn(name = "ProductID", insertable = false, updatable = false)
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private Product product;
 
-    @Column(name = "StockQuantity", nullable = false)
+    @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity = 0;
 
-    @Column(name = "LastUpdated")
+    @Column(name = "last_updated")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdated = new Date();
 }

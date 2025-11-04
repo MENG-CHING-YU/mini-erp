@@ -16,26 +16,26 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "Products")
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ProductID")
+    @Column(name = "product_id")
     private Integer productId;
 
-    @Column(name = "ProductName", nullable = false)
+    @Column(name = "product_name", nullable = false)
     private String productName;
 
-    @Column(name = "ProductDescription")
+    @Column(name = "product_description")
     private String productDescription;
 
-    @Column(name = "UnitPrice", nullable = false)
+    @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(name = "Category")
+    @Column(name = "category")
     private String category;
 
-    @Column(name = "CreatedAt")
+    @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
 }

@@ -52,6 +52,26 @@
           <el-icon><SwitchButton /></el-icon>
           <span>用戶管理</span>
         </el-menu-item>
+        <!-- 庫存管理 -->
+        <el-menu-item index="inventory">
+          <el-icon><SwitchButton /></el-icon>
+          <span>庫存管理</span>
+        </el-menu-item>
+        <!-- 訂單管理 -->
+        <el-menu-item index="orders">
+          <el-icon><SwitchButton /></el-icon>
+          <span>訂單管理</span>
+        </el-menu-item>
+        <!-- 產品管理 -->
+        <el-menu-item index="products">
+          <el-icon><SwitchButton /></el-icon>
+          <span>產品管理</span>
+        </el-menu-item>
+        <!-- 庫存異動 -->
+        <el-menu-item index="transactions">
+          <el-icon><SwitchButton /></el-icon>
+          <span>庫存異動</span>
+        </el-menu-item>
       </el-menu>
 
       <!-- 登出按鈕 -->
