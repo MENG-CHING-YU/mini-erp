@@ -400,12 +400,20 @@ const getStatusType = (status) =>
     maintenance: 'warning',
   })[status] || 'info'
 
-const getStatusText = (status) =>
-  ({
+const getStatusText = (status) => {
+  const textMap = {
     running: '運行中',
+    Running: '運行中',
     stopped: '已停止',
+    Stopped: '已停止',
     maintenance: '維護中',
-  })[status] || '未知'
+    error: '錯誤',
+    Error: '錯誤',
+    idle: '閒置',
+    Idle: '閒置',
+  }
+  return textMap[status] || status
+}
 
 // 判斷是否需要保養
 const isMaintenanceDue = (row) => {

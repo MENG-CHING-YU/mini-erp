@@ -32,7 +32,7 @@ public class OrderService {
         return orderRepository.findById(orderId);
     }
 
-    // ✅ 新增訂單 (修正版 - 先儲存訂單取得 ID，再更新庫存)
+    // ✅ 新增訂單（修正版 - 確保 orderId 正確傳遞）
     @Transactional
     public Order createOrder(Order order) {
         // 驗證訂單基本資訊
@@ -50,19 +50,28 @@ public class OrderService {
             }
         }
         
-        // ✅ 步驟1: 先儲存訂單以取得 orderId
+        // ✅ 步驟1: 先儲存訂單以取得自動生成的 orderId
+        System.out.println("📝 準備儲存訂單...");
         Order savedOrder = orderRepository.save(order);
+        System.out.println("✅ 訂單已儲存，取得 Order ID: " + savedOrder.getOrderId());
         
         // ✅ 步驟2: 使用取得的 orderId 來更新庫存並記錄交易
         for (OrderDetail detail : savedOrder.getOrderDetails()) {
-            // 使用帶有 orderId 的方法來減少庫存
+            System.out.println("📦 處理產品 ID: " + detail.getProduct().getProductId() + 
+                             ", 數量: " + detail.getQuantity() + 
+                             ", 訂單 ID: " + savedOrder.getOrderId());
+            
+            // ⚠️ 重要：使用帶有 orderId 的方法來減少庫存
             inventoryService.decreaseStock(
                 detail.getProduct().getProductId(), 
                 detail.getQuantity(),
-                savedOrder.getOrderId()  // ✅ 傳入 orderId
+                savedOrder.getOrderId()  // ✅ 傳入已生成的 orderId
             );
+            
+            System.out.println("✅ 庫存已更新，交易已記錄");
         }
         
+        System.out.println("🎉 訂單建立完成！");
         return savedOrder;
     }
 

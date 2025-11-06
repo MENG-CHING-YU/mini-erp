@@ -322,14 +322,18 @@ const getStatusType = (status) => {
 }
 
 const getStatusText = (status) => {
-  const texts = {
+  const textMap = {
     running: '運行中',
+    Running: '運行中',
     stopped: '已停止',
-    warning: '警告',
+    Stopped: '已停止',
+    maintenance: '維護中',
     error: '錯誤',
-    unknown: '未知',
+    Error: '錯誤',
+    idle: '閒置',
+    Idle: '閒置',
   }
-  return texts[status] || status
+  return textMap[status] || status
 }
 
 // 警報類型
