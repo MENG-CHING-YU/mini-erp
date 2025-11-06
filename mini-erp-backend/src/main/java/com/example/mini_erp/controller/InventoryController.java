@@ -106,4 +106,16 @@ public class InventoryController {
             return ResponseEntity.badRequest().body(error);
         }
     }
+      // 新增產品庫存
+    @PostMapping("/add-product-stock")
+    public ResponseEntity<?> addProductStock(@RequestBody InventoryDTO inventoryDTO) {
+        try {
+            Inventory inventory = inventoryService.addProductStock(inventoryDTO);
+            InventoryDTO responseDTO = dtoConverter.toInventoryDTO(inventory);
+            return ResponseEntity.status(201).body(responseDTO);
+        } catch (Exception e) {
+            ErrorResponse error = new ErrorResponse(400, "Bad Request", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
 }

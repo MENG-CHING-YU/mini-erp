@@ -1,6 +1,8 @@
 package com.example.mini_erp.service;
 
+import com.example.mini_erp.dto.InventoryDTO;
 import com.example.mini_erp.entity.Inventory;
+import com.example.mini_erp.entity.Product;
 import com.example.mini_erp.exception.BusinessException;
 import com.example.mini_erp.exception.InsufficientStockException;
 import com.example.mini_erp.exception.ResourceNotFoundException;
@@ -111,6 +113,23 @@ public class InventoryService {
 
         // 記錄初始庫存交易
         inventoryTransactionService.createTransaction(productId, initialQuantity, "INITIAL", null);
+
+        return inventoryRepository.save(inventory);
+    }
+     @Transactional
+    public Inventory addProductStock(InventoryDTO inventoryDTO) {
+        Product product = productRepository.findById(inventoryDTO.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("產品 ID " + inventoryDTO.getProductId() + " 不存在"));
+
+        Inventory inventory = inventoryRepository.findById(inventoryDTO.getProductId())
+                .orElse(new Inventory());
+
+        inventory.setProductId(product.getProductId());
+        inventory.setStockQuantity(inventory.getStockQuantity() + inventoryDTO.getStockQuantity());
+        inventory.setLastUpdated(new Date());
+
+        // 記錄庫存交易
+        inventoryTransactionService.createTransaction(inventory.getProductId(), inventoryDTO.getStockQuantity(), "IN", null);
 
         return inventoryRepository.save(inventory);
     }
