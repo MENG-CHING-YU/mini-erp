@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "global": "^4.4.0",
     "vue-router": "^4.6.3"
   }
 }

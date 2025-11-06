@@ -11,7 +11,7 @@ import InventoryView from '@/views/InventoryView.vue'
 import OrdersView from '@/views/OrdersView.vue'
 import ProductsView from '@/views/ProductsView.vue'
 import TransactionsView from '@/views/TransactionsView.vue'
-// import MachineRealtimeView from '@/views/MachineRealtimeView.vue'
+import MachineRealtimeView from '@/views/MachineRealtimeView.vue'
 const routes = [
   {
     path: '/',
@@ -68,11 +68,11 @@ const routes = [
         component: TransactionsView,
         meta: { title: '庫存異動', requiresAuth: true },
       },
-      // {
-      //   path: 'realtime',
-      //   component: MachineRealtimeView,
-      //   meta: { title: '即時監控', requiresAuth: true },
-      // },
+      {
+        path: 'realtime',
+        component: MachineRealtimeView,
+        meta: { title: '即時監控', requiresAuth: true },
+      },
     ],
   },
 ]

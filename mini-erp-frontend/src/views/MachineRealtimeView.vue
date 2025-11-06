@@ -186,8 +186,8 @@ import {
   CircleClose,
 } from '@element-plus/icons-vue'
 import api from '@/utils/api'
-import SockJS from 'sockjs-client'
-import { Client } from '@stomp/stompjs'
+import * as SockJS from 'sockjs-client/dist/sockjs.min.js'
+import { Stomp } from '@stomp/stompjs'
 
 const machineData = ref([])
 const loading = ref(false)
@@ -227,38 +227,40 @@ const loadRealtimeData = async () => {
 
 // 連接 WebSocket
 const connectWebSocket = () => {
-  const socket = new SockJS('http://localhost:8083/ws')
+  try {
+    const socket = new SockJS.default('http://localhost:8083/ws')
+    stompClient = Stomp.over(socket)
 
-  stompClient = new Client({
-    webSocketFactory: () => socket,
-    reconnectDelay: 5000,
-    heartbeatIncoming: 4000,
-    heartbeatOutgoing: 4000,
+    stompClient.reconnectDelay = 5000
+    stompClient.heartbeatIncoming = 4000
+    stompClient.heartbeatOutgoing = 4000
 
-    onConnect: () => {
-      console.log('✅ WebSocket 已連線')
-      wsConnected.value = true
+    stompClient.connect(
+      {},
+      (frame) => {
+        console.log('✅ WebSocket 已連線', frame)
+        wsConnected.value = true
 
-      // 訂閱機台數據主題
-      stompClient.subscribe('/topic/machine-data', (message) => {
-        const data = JSON.parse(message.body)
-        console.log('📡 收到即時數據:', data)
-        updateMachineData(data)
-      })
-    },
-
-    onDisconnect: () => {
-      console.log('❌ WebSocket 已斷線')
-      wsConnected.value = false
-    },
-
-    onStompError: (frame) => {
-      console.error('❌ STOMP 錯誤:', frame)
-      wsConnected.value = false
-    },
-  })
-
-  stompClient.activate()
+        // 訂閱機台數據主題
+        stompClient.subscribe('/topic/machine-data', (message) => {
+          try {
+            const data = JSON.parse(message.body)
+            console.log('📡 收到即時數據:', data)
+            updateMachineData(data)
+          } catch (error) {
+            console.error('❌ 解析訊息失敗:', error)
+          }
+        })
+      },
+      (error) => {
+        console.error('❌ WebSocket 連接錯誤:', error)
+        wsConnected.value = false
+      },
+    )
+  } catch (error) {
+    console.error('❌ 建立 WebSocket 連接失敗:', error)
+    ElMessage.error('WebSocket 連接失敗')
+  }
 }
 
 // 更新機台數據
@@ -274,7 +276,6 @@ const updateMachineData = (newData) => {
 // 查看歷史數據
 const viewHistory = (row) => {
   selectedMachineId.value = row.machineId
-  // 預設查詢最近24小時
   const end = new Date()
   const start = new Date(end.getTime() - 24 * 60 * 60 * 1000)
   dateRange.value = [start, end]
@@ -370,7 +371,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (stompClient) {
-    stompClient.deactivate()
+    stompClient.disconnect()
   }
 })
 </script>

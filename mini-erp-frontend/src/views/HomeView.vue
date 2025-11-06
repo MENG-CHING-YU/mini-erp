@@ -72,10 +72,10 @@
           <el-icon><SwitchButton /></el-icon>
           <span>庫存異動</span>
         </el-menu-item>
-        <!-- <el-menu-item index="realtime">
+        <el-menu-item index="realtime">
           <el-icon><Monitor /></el-icon>
           <span>即時監控</span>
-        </el-menu-item> -->
+        </el-menu-item>
       </el-menu>
 
       <!-- 登出按鈕 -->
