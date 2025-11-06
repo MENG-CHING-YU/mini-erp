@@ -106,14 +106,23 @@ public class InventoryController {
             return ResponseEntity.badRequest().body(error);
         }
     }
-      // 新增產品庫存
+    
+    // 新增產品庫存
     @PostMapping("/add-product-stock")
     public ResponseEntity<?> addProductStock(@RequestBody InventoryDTO inventoryDTO) {
         try {
+            System.out.println("📥 收到新增產品庫存請求:");
+            System.out.println("   Product ID: " + inventoryDTO.getProductId());
+            System.out.println("   Stock Quantity: " + inventoryDTO.getStockQuantity());
+            
             Inventory inventory = inventoryService.addProductStock(inventoryDTO);
             InventoryDTO responseDTO = dtoConverter.toInventoryDTO(inventory);
+            
+            System.out.println("✅ 新增產品庫存成功");
             return ResponseEntity.status(201).body(responseDTO);
         } catch (Exception e) {
+            System.err.println("❌ 新增產品庫存失敗: " + e.getMessage());
+            e.printStackTrace();
             ErrorResponse error = new ErrorResponse(400, "Bad Request", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }

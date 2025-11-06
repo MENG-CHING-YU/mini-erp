@@ -42,9 +42,9 @@ public class InventoryService {
         return inventoryRepository.findById(productId);
     }
 
-    // 更新庫存數量
+    // 更新庫存數量 (內部使用，支援 orderId)
     @Transactional
-    public Inventory updateStock(int productId, int quantity, String transactionType) {
+    public Inventory updateStock(int productId, int quantity, String transactionType, Integer orderId) {
         Inventory inventory = inventoryRepository.findById(productId)
             .orElseGet(() -> {
                 // 如果庫存不存在，創建新庫存
@@ -66,10 +66,16 @@ public class InventoryService {
         inventory.setStockQuantity(newQuantity);
         inventory.setLastUpdated(new Date());
 
-        // 記錄庫存交易
-        inventoryTransactionService.createTransaction(productId, quantity, transactionType, null);
+        // 記錄庫存交易 (包含 orderId)
+        inventoryTransactionService.createTransaction(productId, quantity, transactionType, orderId);
 
         return inventoryRepository.save(inventory);
+    }
+
+    // 🔧 原有的 updateStock 方法 (不帶 orderId，向後相容)
+    @Transactional
+    public Inventory updateStock(int productId, int quantity, String transactionType) {
+        return updateStock(productId, quantity, transactionType, null);
     }
 
     // 增加庫存
@@ -78,16 +84,25 @@ public class InventoryService {
         if (quantity <= 0) {
             throw new IllegalArgumentException("增加數量必須大於 0");
         }
-        return updateStock(productId, quantity, "IN");
+        return updateStock(productId, quantity, "IN", null);
     }
 
-    // 減少庫存
+    // 減少庫存 (不帶 orderId)
     @Transactional
     public Inventory decreaseStock(int productId, int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("減少數量必須大於 0");
         }
-        return updateStock(productId, -quantity, "OUT");
+        return updateStock(productId, -quantity, "OUT", null);
+    }
+
+    // ✅ 新增: 減少庫存 (帶 orderId) - 供訂單系統使用
+    @Transactional
+    public Inventory decreaseStock(int productId, int quantity, Integer orderId) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("減少數量必須大於 0");
+        }
+        return updateStock(productId, -quantity, "OUT", orderId);
     }
 
     // 初始化產品庫存
@@ -116,7 +131,8 @@ public class InventoryService {
 
         return inventoryRepository.save(inventory);
     }
-     @Transactional
+
+    @Transactional
     public Inventory addProductStock(InventoryDTO inventoryDTO) {
         Product product = productRepository.findById(inventoryDTO.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("產品 ID " + inventoryDTO.getProductId() + " 不存在"));

@@ -32,7 +32,7 @@ public class OrderService {
         return orderRepository.findById(orderId);
     }
 
-    // 新增訂單
+    // ✅ 新增訂單 (修正版 - 先儲存訂單取得 ID，再更新庫存)
     @Transactional
     public Order createOrder(Order order) {
         // 驗證訂單基本資訊
@@ -43,14 +43,27 @@ public class OrderService {
             throw new IllegalArgumentException("訂單明細不能為空");
         }
         
-        // 在創建訂單之前檢查庫存並更新庫存
+        // 驗證數量
         for (OrderDetail detail : order.getOrderDetails()) {
             if (detail.getQuantity() <= 0) {
                 throw new IllegalArgumentException("訂單數量必須大於 0");
             }
-            inventoryService.decreaseStock(detail.getProduct().getProductId(), detail.getQuantity());
         }
-        return orderRepository.save(order);
+        
+        // ✅ 步驟1: 先儲存訂單以取得 orderId
+        Order savedOrder = orderRepository.save(order);
+        
+        // ✅ 步驟2: 使用取得的 orderId 來更新庫存並記錄交易
+        for (OrderDetail detail : savedOrder.getOrderDetails()) {
+            // 使用帶有 orderId 的方法來減少庫存
+            inventoryService.decreaseStock(
+                detail.getProduct().getProductId(), 
+                detail.getQuantity(),
+                savedOrder.getOrderId()  // ✅ 傳入 orderId
+            );
+        }
+        
+        return savedOrder;
     }
 
     // 更新訂單狀態

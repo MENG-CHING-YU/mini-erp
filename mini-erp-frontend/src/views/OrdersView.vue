@@ -258,6 +258,8 @@ const formData = ref({
   customerEmail: '',
   shippingAddress: '',
   totalAmount: 0,
+  status: 'Pending',
+  paymentStatus: 'Pending',
   orderDetails: [],
 })
 
@@ -338,6 +340,8 @@ const handleAdd = () => {
     customerEmail: '',
     shippingAddress: '',
     totalAmount: 0,
+    status: 'Pending',
+    paymentStatus: 'Pending',
     orderDetails: [],
   }
   dialogVisible.value = true
@@ -376,26 +380,49 @@ const handleSubmit = async () => {
   if (!formRef.value) return
   await formRef.value.validate(async (valid) => {
     if (!valid) return
+
     if (formData.value.orderDetails.length === 0) {
       ElMessage.error('請至少新增一筆訂單明細')
       return
     }
+
+    // 檢查所有明細是否都已選擇產品
+    const hasEmptyProduct = formData.value.orderDetails.some((detail) => !detail.productId)
+    if (hasEmptyProduct) {
+      ElMessage.error('請為所有訂單明細選擇產品')
+      return
+    }
+
     submitLoading.value = true
     try {
+      console.log('📤 準備送出訂單資料:', formData.value)
+
       // 轉換格式以符合後端要求
       const orderData = {
-        ...formData.value,
+        customerName: formData.value.customerName,
+        customerEmail: formData.value.customerEmail,
+        shippingAddress: formData.value.shippingAddress,
+        totalAmount: formData.value.totalAmount,
+        status: formData.value.status,
+        paymentStatus: formData.value.paymentStatus,
         orderDetails: formData.value.orderDetails.map((detail) => ({
-          product: { productId: detail.productId },
+          product: {
+            productId: detail.productId,
+          },
           quantity: detail.quantity,
           unitPrice: detail.unitPrice,
         })),
       }
+
+      console.log('📤 轉換後的訂單資料:', orderData)
+
       await api.post('/api/orders', orderData)
       ElMessage.success('新增成功')
       dialogVisible.value = false
       loadOrders()
     } catch (error) {
+      console.error('❌ 新增訂單失敗:', error)
+      console.error('❌ 錯誤詳情:', error.response?.data)
       ElMessage.error(error.response?.data?.message || '新增失敗')
     } finally {
       submitLoading.value = false

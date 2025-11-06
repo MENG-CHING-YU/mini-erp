@@ -34,8 +34,17 @@ public class InventoryTransactionController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(transactionDTOs);
     }
-
-    // ⚠️ 移除手動建立交易紀錄的 API
-    // 交易紀錄應該只由系統自動產生（在庫存變動時）
-    // 如果需要手動調整，應該透過 InventoryController 的增加/減少庫存 API
+    // 查詢所有庫存交易紀錄
+// 在 InventoryTransactionController.java 新增
+@GetMapping
+public ResponseEntity<List<InventoryTransactionDTO>> getAllTransactions() {
+    List<InventoryTransaction> transactions = inventoryTransactionService.getAllTransactions();
+    if (transactions.isEmpty()) {
+        return ResponseEntity.noContent().build();
+    }
+    List<InventoryTransactionDTO> transactionDTOs = transactions.stream()
+            .map(dtoConverter::toInventoryTransactionDTO)
+            .collect(Collectors.toList());
+    return ResponseEntity.ok(transactionDTOs);
+}
 }

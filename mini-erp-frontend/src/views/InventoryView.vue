@@ -7,13 +7,21 @@
 
       <!-- 搜尋區域 -->
       <el-form :inline="true" style="margin-bottom: 20px">
-        <el-form-item label="產品ID">
-          <el-input
+        <el-form-item label="產品">
+          <el-select
             v-model="searchForm.productId"
-            placeholder="請輸入產品ID"
+            placeholder="請選擇產品"
             clearable
-            style="width: 150px"
-          />
+            filterable
+            style="width: 250px"
+          >
+            <el-option
+              v-for="product in products"
+              :key="product.productId"
+              :label="`${product.productName} (ID: ${product.productId})`"
+              :value="product.productId"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜尋</el-button>
@@ -95,6 +103,20 @@
           :closable="false"
           style="margin-top: -10px"
         />
+        <el-alert
+          v-if="operationType === 'increase'"
+          :title="`將增加 ${formData.quantity || 0} 件，調整後庫存：${formData.currentStock + (formData.quantity || 0)} 件`"
+          type="success"
+          :closable="false"
+          style="margin-top: 10px"
+        />
+        <el-alert
+          v-if="operationType === 'decrease'"
+          :title="`將減少 ${formData.quantity || 0} 件，調整後庫存：${formData.currentStock - (formData.quantity || 0)} 件`"
+          :type="formData.currentStock - (formData.quantity || 0) < 0 ? 'error' : 'warning'"
+          :closable="false"
+          style="margin-top: 10px"
+        />
       </el-form>
 
       <template #footer>
@@ -110,7 +132,7 @@ import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/utils/api'
 
-const searchForm = ref({ productId: '' })
+const searchForm = ref({ productId: null })
 const tableData = ref([])
 const products = ref([])
 const loading = ref(false)
@@ -138,7 +160,7 @@ const formRules = {
 const filteredData = computed(() => {
   let data = tableData.value
   if (searchForm.value.productId) {
-    data = data.filter((item) => item.productId.toString().includes(searchForm.value.productId))
+    data = data.filter((item) => item.productId === searchForm.value.productId)
   }
   return data
 })
@@ -194,7 +216,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.value = { productId: '' }
+  searchForm.value = { productId: null }
   currentPage.value = 1
 }
 
@@ -275,3 +297,9 @@ onMounted(() => {
   loadInventory()
 })
 </script>
+
+<style scoped>
+:deep(.el-alert) {
+  padding: 8px 12px;
+}
+</style>

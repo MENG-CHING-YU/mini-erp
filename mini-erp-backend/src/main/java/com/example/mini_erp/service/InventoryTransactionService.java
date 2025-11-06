@@ -55,4 +55,8 @@ public class InventoryTransactionService {
     public List<InventoryTransaction> getTransactionsByProductId(int productId) {
         return inventoryTransactionRepository.findByProductProductId(productId);
     }
+
+   public List<InventoryTransaction> getAllTransactions() {
+    return inventoryTransactionRepository.findAll();
+}
 }

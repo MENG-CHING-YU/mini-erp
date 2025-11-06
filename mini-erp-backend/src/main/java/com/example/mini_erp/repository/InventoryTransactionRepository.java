@@ -14,4 +14,7 @@ public interface InventoryTransactionRepository extends JpaRepository<InventoryT
     
     // 根據交易類型查詢
     List<InventoryTransaction> findByTransactionType(String transactionType);
+   
+    
+
 }
