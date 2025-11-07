@@ -186,7 +186,9 @@ import {
   CircleClose,
 } from '@element-plus/icons-vue'
 import api from '@/utils/api'
-import * as SockJS from 'sockjs-client/dist/sockjs.min.js'
+// SockJS will be loaded dynamically inside connectWebSocket to handle
+// ESM/CJS interoperability differences across bundlers (Vite, webpack).
+// import SockJS from 'sockjs-client'
 import { Stomp } from '@stomp/stompjs'
 
 const machineData = ref([])
@@ -225,10 +227,14 @@ const loadRealtimeData = async () => {
   }
 }
 
-// 連接 WebSocket
-const connectWebSocket = () => {
+// 連接 WebSocket（動態載入 SockJS 以支援 ESM/CJS 互通）
+const connectWebSocket = async () => {
   try {
-    const socket = new SockJS.default('http://localhost:8083/ws')
+    // 動態 import，可取得 module.default 或 module 本體
+    const sockjsModule = await import('sockjs-client')
+    const SockJS = sockjsModule && (sockjsModule.default || sockjsModule)
+
+    const socket = new SockJS('http://localhost:8083/ws')
     stompClient = Stomp.over(socket)
 
     stompClient.reconnectDelay = 5000

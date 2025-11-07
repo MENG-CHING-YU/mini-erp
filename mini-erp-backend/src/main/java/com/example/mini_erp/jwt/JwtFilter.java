@@ -36,6 +36,14 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
+        // 放行 WebSocket 握手與 SockJS 資訊請求 (例如 /ws/info)
+        // 使用 contains() 以涵蓋有 context path 或其他前綴的情況
+        if (path != null && path.contains("/ws")) {
+            System.out.println("✅ 放行 WebSocket 握手/SockJS 資訊請求: " + path);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 放行 OPTIONS 預檢請求
         if ("OPTIONS".equalsIgnoreCase(method)) {
             System.out.println("✅ 放行 OPTIONS 請求");

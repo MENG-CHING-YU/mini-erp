@@ -14,6 +14,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   optimizeDeps: {
-    exclude: ['sockjs-client'],
+    // 將 sockjs-client 加入預打包，避免在瀏覽器直接載入 CJS 版本導致 require is not defined
+    include: ['sockjs-client'],
   },
 })

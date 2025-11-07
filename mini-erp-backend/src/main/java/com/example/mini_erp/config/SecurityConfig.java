@@ -39,9 +39,9 @@ public class SecurityConfig {
             
             // 授權規則
             .authorizeHttpRequests(auth -> auth
-                // 公開端點
-                .requestMatchers("/users/login", "/users/register").permitAll()
-                
+                // 公開端點（含 WebSocket 握手與 SockJS 資訊端點）
+                .requestMatchers("/users/login", "/users/register", "/ws/**").permitAll()
+
                 // 其他所有請求都需要認證
                 .anyRequest().authenticated()
             )
